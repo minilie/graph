@@ -1,0 +1,78 @@
+#version 450
+
+layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in; // workgroup size
+
+layout(std430) restrict buffer positionBuffer
+{
+    vec3 position[];
+};
+
+layout(std430) restrict readonly buffer forceBuffer
+{
+	vec3 force[];
+};
+
+layout(std430) restrict buffer velocityBuffer
+{
+    vec3 velocity[];
+};
+
+layout(std430) restrict readonly buffer densityBuffer
+{
+    float density[];
+};
+
+const float Damping = 0.7;
+
+layout(location = 0) uniform float dt;
+layout(location = 1) uniform vec3 gravityDir;
+
+uvec3 resolution = gl_NumWorkGroups * gl_WorkGroupSize;
+
+void main()
+{
+    uint id =
+        gl_GlobalInvocationID.x * resolution.y * resolution.z +
+        gl_GlobalInvocationID.y * resolution.z +
+        gl_GlobalInvocationID.z;
+
+    vec3 acceleration = force[id] / density[id] + gravityDir * 9.8;
+    vec3 vel = velocity[id] + acceleration * dt;
+    vec3 pos = position[id] + vel * dt;
+
+    if(pos[0] < -1.0)
+    {
+        pos[0] = -1.0 - Damping - Damping * pos[0];
+        vel[0] = -Damping * vel[0];
+    }
+    if(pos[0] > 1.0)
+    {
+        pos[0] = 1.0 + Damping - Damping * pos[0];
+        vel[0] = -Damping * vel[0];
+    }
+
+    if(pos[1] < -1.0)
+    {
+        pos[1] = -1.0 - Damping - Damping * pos[1];
+        vel[1] = -Damping * vel[1];
+    }
+    if(pos[1] > 1.0)
+    {
+        pos[1] =  1.0 + Damping - Damping * pos[1];
+        vel[1] = -Damping * vel[1];
+    }
+
+    if(pos[2] < -1.0)
+    {
+        pos[2] = -1.0 - Damping - Damping * pos[2];
+        vel[2] = -Damping * vel[2];
+    }
+    if(pos[2] > 1.0)
+    {
+        pos[2] =  1.0 + Damping - Damping * pos[2];
+        vel[2] = -Damping * vel[2];
+    }
+
+    velocity[id] = vel;
+    position[id] = pos;
+}

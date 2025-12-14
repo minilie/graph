@@ -1,0 +1,42 @@
+#version 450
+
+layout(local_size_x = 64) in;
+
+layout(std430) restrict buffer gridBuffer
+{
+	uint gridElemPrefix[];
+};
+
+layout(std430) restrict writeonly buffer superBlockBuffer
+{
+	uint superGrid[];
+};
+
+const uint superBlockLength = 200;
+
+uvec3 resolution = gl_NumWorkGroups * gl_WorkGroupSize;
+
+void main()
+{
+	uint index  =
+		gl_GlobalInvocationID.x * resolution.y * resolution.z +
+		gl_GlobalInvocationID.y * resolution.z +
+		gl_GlobalInvocationID.z;
+
+	if(index >= 40)
+		return;
+
+	uint start = index * superBlockLength;
+
+	uint prefix = gridElemPrefix[start];
+	gridElemPrefix[start] = 0;
+
+	uint maxOffset = start + superBlockLength;
+	for(uint offset = start + 1; offset < maxOffset; ++offset)
+	{
+		uint temp = gridElemPrefix[offset];
+		gridElemPrefix[offset] = prefix;
+		prefix += temp;
+	}
+	superGrid[index] = prefix;
+}
