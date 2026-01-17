@@ -52,6 +52,7 @@ bool Program::VsFsProgram( const std::string& vertexShaderName,
 	{
 		Logger::Error() << "Vertex Fragment program creation failed: Linking failed:\n"
 			<< GetInfoLog() << '\n';
+		return false;
 	}
 
 	return true;

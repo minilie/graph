@@ -21,6 +21,8 @@ static constexpr const unsigned EyeLocation = 0;
 static constexpr const unsigned PlaneOriginLocation = 1;
 static constexpr const unsigned PlaneAxisXLocation = 2;
 static constexpr const unsigned PlaneAxisYLocation = 3;
+static constexpr const unsigned BoundaryTypeLocation = 4;
+static constexpr const unsigned BoundaryRadiusLocation = 5;
 
 RenderPoints::RenderPoints(SimulationState& _state) :
 	state(_state)
@@ -41,7 +43,8 @@ void RenderPoints::CompileShaders()
 	}
 }
 
-void RenderPoints::Render(const glm::vec3& eye, const glm::vec3& planeOrigin, const glm::vec3& planeAxisX, const glm::vec3& planeAxisY)
+void RenderPoints::Render(const glm::vec3& eye, const glm::vec3& planeOrigin, const glm::vec3& planeAxisX, const glm::vec3& planeAxisY,
+	int boundaryType, float boundaryRadius)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -55,6 +58,8 @@ void RenderPoints::Render(const glm::vec3& eye, const glm::vec3& planeOrigin, co
 	glUniform3fv(PlaneOriginLocation, 1, reinterpret_cast<const GLfloat*>(&planeOrigin[0]));
 	glUniform3fv(PlaneAxisXLocation, 1, reinterpret_cast<const GLfloat*>(&planeAxisX[0]));
 	glUniform3fv(PlaneAxisYLocation, 1, reinterpret_cast<const GLfloat*>(&planeAxisY[0]));
+	glUniform1i(BoundaryTypeLocation, boundaryType);
+	glUniform1f(BoundaryRadiusLocation, boundaryRadius);
 
 	glDrawArrays(GL_POINTS, 0, state.ResX() * state.ResY() * state.ResZ());
 }

@@ -19,6 +19,8 @@ static constexpr const unsigned DistanceTextureUnit = 0;
 static constexpr const unsigned TextureLocation = 0;
 static constexpr const unsigned EyeLocation = 1;
 static constexpr const unsigned WorldLocation = 2;
+static constexpr const unsigned BoundaryLocation = 3;
+static constexpr const unsigned BoundaryRadiusLocation = 4;
 
 RenderSurface::RenderSurface(SimulationState& _state) :
 	state(_state),
@@ -63,6 +65,8 @@ void RenderSurface::CompileShaders()
 
 void RenderSurface::DistanceField()
 {
+	if(!distanceFieldProgram)
+		return;
 	unsigned edgeCount = state.GetEdgeCount();
 
 	float max = 1.0;
@@ -70,8 +74,9 @@ void RenderSurface::DistanceField()
 	glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	distanceFieldProgram.Use();
-
-	glUniform1i(TextureLocation, DistanceTextureUnit);
+	// Provide boundary selection to compute shader
+	glUniform1i(BoundaryLocation, static_cast<GLint>(GetBoundaryMode()));
+	glUniform1f(BoundaryRadiusLocation, GetBoundaryRadius());
 	glDispatchCompute(edgeCount / 64 + 1, 1, 1);
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
@@ -79,6 +84,8 @@ void RenderSurface::DistanceField()
 
 void RenderSurface::Raycast()
 {
+	if(!raycastProgram)
+		return;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	raycastProgram.Use();
@@ -91,6 +98,9 @@ void RenderSurface::Raycast()
 
 	//glm::vec3 eye = world * glm::vec4(0.0, 0.0, 2.0, 1.0);
 	glUniform3fv(EyeLocation, 1, reinterpret_cast<const GLfloat*>(&camera.GetEye()[0]));
+
+	glUniform1i(BoundaryLocation, static_cast<GLint>(GetBoundaryMode()));
+	glUniform1f(BoundaryRadiusLocation, GetBoundaryRadius());
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

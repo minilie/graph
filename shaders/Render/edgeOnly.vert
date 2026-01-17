@@ -21,6 +21,24 @@ layout(location = 0) uniform vec3 Eye;
 layout(location = 1) uniform vec3 PlaneOrigin;
 layout(location = 2) uniform vec3 PlaneAxisX;
 layout(location = 3) uniform vec3 PlaneAxisY;
+layout(location = 4) uniform int BoundaryType;
+layout(location = 5) uniform float BoundaryRadius;
+
+bool inCube(vec3 p)
+{
+	return all(lessThan(p, vec3(1.0))) && all(greaterThanEqual(p, vec3(0.0)));
+}
+
+bool inSphere(vec3 p)
+{
+	vec3 c = vec3(0.5, 0.5, 0.5);
+	return distance(p, c) <= BoundaryRadius;
+}
+
+bool inBoundary(vec3 p)
+{
+	return (BoundaryType == 0) ? inCube(p) : inSphere(p);
+}
 
 void main()
 {
@@ -30,6 +48,13 @@ void main()
 	const float scale = 1.0 / 2.2;
 	const float offset = 1.0 / 2.2 + 0.05;
 	vec3 cubePos = pos * scale + vec3(offset);
+
+	if(!inBoundary(cubePos))
+	{
+		gl_Position = vec4(2, 2, 2, 1);
+		gl_PointSize = 1;
+		return;
+	}
 
 	vec3 ray = cubePos - Eye;
 	vec3 n = cross(PlaneAxisX, PlaneAxisY);

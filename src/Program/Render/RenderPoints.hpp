@@ -23,7 +23,8 @@ public:
 
 	~RenderPoints() = default;
 
-	void Render(const glm::vec3& eye, const glm::vec3& planeOrigin, const glm::vec3& planeAxisX, const glm::vec3& planeAxisY);
+	void Render(const glm::vec3& eye, const glm::vec3& planeOrigin, const glm::vec3& planeAxisX, const glm::vec3& planeAxisY,
+		int boundaryType, float boundaryRadius);
 };
 
 #endif

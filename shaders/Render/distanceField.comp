@@ -15,6 +15,25 @@ const float MinRadius = 0.00;//0.05 * distFieldSize;
 
 const int boxSize = 6;//int(ceil(distFieldSize * MaxRadius / 2.0));
 
+layout(location = 3) uniform int BoundaryType; // 0: Cube, 1: Sphere
+layout(location = 4) uniform float BoundaryRadius; // normalized [0,1], sphere radius
+
+bool inCube(vec3 p)
+{
+	return all(lessThan(p, vec3(1.0))) && all(greaterThanEqual(p, vec3(0.0)));
+}
+
+bool inSphere(vec3 p)
+{
+	vec3 c = vec3(0.5, 0.5, 0.5);
+	return distance(p, c) <= BoundaryRadius;
+}
+
+bool inBoundary(vec3 p)
+{
+	return (BoundaryType == 0) ? inCube(p) : inSphere(p);
+}
+
 void main()
 {
 	uint id =
@@ -24,7 +43,7 @@ void main()
 
 	if(id < edgeParticles.count)
 	{
-        const ivec3 distFieldSize = imageSize(distanceField);
+		const ivec3 distFieldSize = imageSize(distanceField);
 		vec3 pos = ((edgeParticles.position[id] + 1.0) / 2.2 + vec3(0.05, 0.05, 0.05)) * distFieldSize;
 		vec3 center = pos;
 		for(int x = -1 * boxSize; x < boxSize; ++x)
@@ -42,13 +61,18 @@ void main()
 					if(center.z + z < 0 || center.z + z >= distFieldSize.z)
 						continue;
 
-					float dist = distance(pos, center + vec3(x, y, z)) / distFieldSize.x;
+					ivec3 sampleCoord = ivec3(center) + ivec3(x, y, z);
+					vec3 sampleNorm = vec3(sampleCoord) / vec3(distFieldSize);
+					if(!inBoundary(sampleNorm))
+						continue;
+
+					float dist = distance(pos, vec3(sampleCoord)) / distFieldSize.x;
 					if(dist >= MinRadius && dist <= MaxRadius)
 					{
 						//imageAtomicMin(distanceField, ivec3(center + ivec3(x, y, z)), int(dist * 10000));
-                        float prev = imageLoad(distanceField, ivec3(center + ivec3(x, y, z))).r;
-                        if(dist < prev)
-                            imageStore(distanceField, ivec3(center + ivec3(x, y, z)), vec4(dist));
+						float prev = imageLoad(distanceField, sampleCoord).r;
+						if(dist < prev)
+							imageStore(distanceField, sampleCoord, vec4(dist));
 					}
 				}
 			}

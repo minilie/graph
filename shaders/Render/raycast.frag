@@ -10,6 +10,8 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) uniform sampler3D distanceText;
 
 layout(location = 1) uniform vec3 Eye;
+layout(location = 3) uniform int BoundaryType;
+layout(location = 4) uniform float BoundaryRadius;
 
 struct Plain
 {
@@ -65,6 +67,18 @@ bool inCube(vec3 pos)
 		all(greaterThanEqual(pos, vec3(0, 0, 0)));
 }
 
+bool inSphere(vec3 pos)
+{
+	vec3 c = vec3(0.5, 0.5, 0.5);
+	float r = BoundaryRadius;
+	return distance(pos, c) <= r;
+}
+
+bool inBoundary(vec3 pos)
+{
+	return (BoundaryType == 0) ? inCube(pos) : inSphere(pos);
+}
+
 bool inCube(vec2 pos)
 {
 	return
@@ -113,7 +127,7 @@ void hitZ(vec3 rayPos, vec3 rayDir, inout float minAlpha)
 		minAlpha = min(alpha, minAlpha);
 }
 
-void hitBorders(inout vec3 rayPos, vec3 rayDir)
+void hitCube(inout vec3 rayPos, vec3 rayDir)
 {
 	float minAlpha = 10;
 	hitX(rayPos, rayDir, minAlpha);
@@ -123,11 +137,40 @@ void hitBorders(inout vec3 rayPos, vec3 rayDir)
 	rayPos = rayPos + minAlpha * rayDir;
 }
 
+void hitSphere(inout vec3 rayPos, vec3 rayDir)
+{
+	vec3 c = vec3(0.5, 0.5, 0.5);
+	float r = BoundaryRadius;
+	vec3 oc = rayPos - c;
+	float b = dot(oc, rayDir);
+	float cc = dot(oc, oc) - r * r;
+	float disc = b * b - cc;
+	if(disc < 0.0)
+		return;
+	float s = sqrt(disc);
+	float t = -b - s;
+	if(t < 0.0)
+	{
+		t = -b + s;
+		if(t < 0.0)
+			return;
+	}
+	rayPos = rayPos + t * rayDir;
+}
+
+void hitBoundary(inout vec3 rayPos, vec3 rayDir)
+{
+	if(BoundaryType == 0)
+		hitCube(rayPos, rayDir);
+	else
+		hitSphere(rayPos, rayDir);
+}
+
 void main()
 {
 	const vec3 rayDir = normalize(rayStart - Eye);
 	vec3 rayPos = rayStart;
-	hitBorders(rayPos, rayDir);
+	hitBoundary(rayPos, rayDir);
 
 	vec4 fragColor = vec4(0, 0, 0, 0);
 	vec4 color;
@@ -136,7 +179,7 @@ void main()
 	{
 		rayPos += SampleStep * rayDir;
 
-		if(!inCube(rayPos))
+		if(!inBoundary(rayPos))
 			break;
 
 		dist = texture(distanceText, rayPos).r;

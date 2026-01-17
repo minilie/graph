@@ -242,7 +242,9 @@ void SPHWaterScene::Render()
 			glm::vec3 planeAxisX = bottomRight - bottomLeft;
 			glm::vec3 planeAxisY = topLeft - bottomLeft;
 
-			renderPoints.Render(eye, planeOrigin, planeAxisX, planeAxisY);
+			int bType = renderSurface.IsSphere() ? 1 : 0;
+			float bRadius = renderSurface.GetBoundaryRadius();
+			renderPoints.Render(eye, planeOrigin, planeAxisX, planeAxisY, bType, bRadius);
 			break;
 		}
 		case RenderMode::EdgePoints:
@@ -258,7 +260,9 @@ void SPHWaterScene::Render()
 			glm::vec3 planeAxisX = bottomRight - bottomLeft;
 			glm::vec3 planeAxisY = topLeft - bottomLeft;
 
-			renderEdgePoints.Render(eye, planeOrigin, planeAxisX, planeAxisY);
+			int bType = renderSurface.IsSphere() ? 1 : 0;
+			float bRadius = renderSurface.GetBoundaryRadius();
+			renderEdgePoints.Render(eye, planeOrigin, planeAxisX, planeAxisY, bType, bRadius);
 			break;
 		}
 	}
@@ -304,6 +308,30 @@ void SPHWaterScene::OnKeyboard(SDL_KeyboardEvent& event)
 			{
 				renderMode = RenderMode::EdgePoints;
 				Logger::Info() << "Render mode: " << RenderModeName(renderMode) << '\n';
+			}
+			break;
+		case 'f':
+			if(event.state == SDL_RELEASED)
+			{
+				renderSurface.ToggleBoundaryMode();
+				distanceFieldDirty = true;
+				Logger::Info() << "Boundary mode: " << (renderSurface.IsSphere() ? "Sphere" : "Cube") << '\n';
+			}
+			break;
+		case ']':
+			if(event.state == SDL_RELEASED)
+			{
+				renderSurface.SetBoundaryRadius(renderSurface.GetBoundaryRadius() + 0.05f);
+				distanceFieldDirty = true;
+				Logger::Info() << "Boundary radius: " << renderSurface.GetBoundaryRadius() << '\n';
+			}
+			break;
+		case '[':
+			if(event.state == SDL_RELEASED)
+			{
+				renderSurface.SetBoundaryRadius(renderSurface.GetBoundaryRadius() - 0.05f);
+				distanceFieldDirty = true;
+				Logger::Info() << "Boundary radius: " << renderSurface.GetBoundaryRadius() << '\n';
 			}
 			break;
 		case 'k':

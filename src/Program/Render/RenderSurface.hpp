@@ -24,6 +24,9 @@ private:
 	GL::VertexArray va;
 
 	OrbiterCamera camera;
+	enum class BoundaryMode { Cube = 0, Sphere = 1 };
+	BoundaryMode boundaryMode = BoundaryMode::Cube;
+	float boundaryRadius = 0.5f;
 
  	void CompileShaders();
 	void DistanceField();
@@ -65,6 +68,35 @@ public:
 	{
 		return glm::vec3(camera.GetView() * glm::vec4(0, -1, 0, 0));
 	}
+
+	void SetBoundaryMode(BoundaryMode mode)
+	{
+		boundaryMode = mode;
+	}
+
+	void ToggleBoundaryMode()
+	{
+		boundaryMode = (boundaryMode == BoundaryMode::Cube) ? BoundaryMode::Sphere : BoundaryMode::Cube;
+	}
+
+	BoundaryMode GetBoundaryMode() const
+	{
+		return boundaryMode;
+	}
+
+	bool IsSphere() const
+	{
+		return boundaryMode == BoundaryMode::Sphere;
+	}
+
+	void SetBoundaryRadius(float r)
+	{
+		boundaryRadius = r;
+		if(boundaryRadius < 0.1f) boundaryRadius = 0.1f;
+		if(boundaryRadius > 0.9f) boundaryRadius = 0.9f;
+	}
+
+	float GetBoundaryRadius() const { return boundaryRadius; }
 };
 
 #endif
