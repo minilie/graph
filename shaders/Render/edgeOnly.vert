@@ -1,3 +1,11 @@
+//
+// Edge-only vertex shader
+// 边缘粒子顶点着色器：根据当前边界类型（立方体/球体）进行裁剪并投影到屏幕平面。
+// Uniform:
+//  - Eye: 相机位置
+//  - PlaneOrigin/PlaneAxisX/PlaneAxisY: 屏幕平面定义
+//  - BoundaryType (0: Cube, 1: Sphere)
+//  - BoundaryRadius: 球体半径（归一化）
 #version 450
 
 layout(std430) restrict buffer edgeBuffer

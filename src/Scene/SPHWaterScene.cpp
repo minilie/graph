@@ -338,6 +338,7 @@ void SPHWaterScene::OnKeyboard(SDL_KeyboardEvent& event)
 			if(event.state == SDL_RELEASED)
 				paused = !paused;
 			break;
+			// 视角控制：W/S 垂直，A/D 水平
 			case 'w':
 				if(event.state == SDL_PRESSED)
 				{

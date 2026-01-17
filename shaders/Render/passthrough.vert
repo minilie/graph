@@ -1,3 +1,11 @@
+//
+// Passthrough vertex shader for particles
+// 粒子顶点着色器：将立方体坐标映射到屏幕平面，并按边界类型执行裁剪。
+// Uniform:
+//  - Eye: 相机位置
+//  - PlaneOrigin/PlaneAxisX/PlaneAxisY: 屏幕平面定义
+//  - BoundaryType (0: Cube, 1: Sphere)
+//  - BoundaryRadius: 球体半径（归一化）
 #version 450
 
 layout(std430, binding = 0) restrict readonly buffer positionBuffer
