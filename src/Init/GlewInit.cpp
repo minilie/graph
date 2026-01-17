@@ -1,3 +1,8 @@
+/**
+ * @file GlewInit.cpp
+ * @brief 实现 OpenGL 上下文和 GLEW 初始化的功能。
+ */
+
 #include "GlewInit.h"
 
 #include "../Log/Logger.h"
@@ -6,6 +11,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
+/**
+ * @brief 配置 SDL 的 OpenGL 上下文属性，例如版本、颜色缓冲和深度缓冲等。
+ * @return 始终返回 true，表示属性设置已完成。
+ */
 bool GlewInit::InitContext()
 {
 	// Setting up SDL_OPENGL Attributes
@@ -37,6 +46,10 @@ bool GlewInit::InitContext()
 	return true;
 }
 
+/**
+ * @brief 初始化 GLEW，并输出 OpenGL 版本信息。
+ * @return 初始化成功返回 true，失败时记录错误信息并返回 false。
+ */
 bool GlewInit::InitGlew()
 {
 	// Starting Glew

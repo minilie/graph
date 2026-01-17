@@ -1,3 +1,8 @@
+/**
+ * @file BasicVertexDescriptor.hpp
+ * @brief 声明基础顶点格式的 VAO 描述器，封装顶点属性布局。
+ */
+
 #ifndef BASIC_VERTEX_DESCRIPTOR_HPP
 #define BASIC_VERTEX_DESCRIPTOR_HPP
 
@@ -10,11 +15,17 @@
 
 #include <cstddef>
 
+/**
+ * @brief 为 BasicVertexFormat 设置顶点属性布局的封装类。
+ */
 class BasicVertexDescriptor : public GL::VertexArray
 {
 private:
 	GL::VertexArrayBinding binding;
 public:
+	/**
+	 * @brief 构造函数，初始化顶点属性布局（位置、法线、UV）。
+	 */
 	BasicVertexDescriptor()
 	{
 		//First attrribute
@@ -33,16 +44,27 @@ public:
 		binding.BindAttrib(*this, 2);
 	}
 
+	/**
+	 * @brief 绑定顶点缓冲到 VAO，设置步长等信息。
+	 * @param buffer 顶点缓冲对象。
+	 */
 	inline void AttachVertex(const GL::Buffer& buffer)
 	{
 		binding.BindBuffer(*this, buffer, 0, sizeof(BasicVertexFormat));
 	}
 
+	/**
+	 * @brief 绑定当前 VAO。
+	 */
 	inline void Bind() const
 	{
 		VertexArray::Bind();
 	}
 
+	/**
+	 * @brief 获取底层 VAO 句柄。
+	 * @return OpenGL VAO 标识。
+	 */
 	inline GLint Get() const
 	{
 		return id;

@@ -1,3 +1,8 @@
+/**
+ * @file Game.cpp
+ * @brief 实现 Game 类的主要逻辑，包括初始化、主循环、事件处理、渲染和销毁。
+ */
+
 #include "Game.h"
 
 #include "../Scene/InGameScene.h"
@@ -12,12 +17,17 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-
+/**
+ * @brief 构造 Game 对象，初始化运行标志等成员。
+ */
 Game::Game() :
 	running(true)
 {
 }
 
+/**
+ * @brief 进入游戏主循环，负责初始化并在循环中依次处理事件、更新和渲染。
+ */
 void Game::Run()
 {
 	// If something fails at init we quit
@@ -35,6 +45,16 @@ void Game::Run()
 	Destroy();
 }
 
+/**
+ * @brief OpenGL 调试输出回调，将调试信息写入日志系统。
+ * @param source 消息来源。
+ * @param type 消息类型。
+ * @param id 消息 ID。
+ * @param severity 消息严重程度。
+ * @param length 消息长度。
+ * @param message 调试信息内容。
+ * @param userParam 用户自定义指针，未使用。
+ */
 void LogGLDebug(GLenum source, GLenum type, GLuint id,
 	GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
@@ -54,6 +74,10 @@ void LogGLDebug(GLenum source, GLenum type, GLuint id,
 	}
 }
 
+/**
+ * @brief 初始化 SDL、窗口管理器和初始场景，并注册 OpenGL 调试回调。
+ * @return 初始化成功返回 true，失败返回 false。
+ */
 bool Game::Init()
 {
 	if (!SDLInit::Init())
@@ -84,6 +108,9 @@ bool Game::Init()
 	return true;
 }
 
+/**
+ * @brief 处理 SDL 事件并将其转发给当前场景。
+ */
 void Game::HandleEvents()
 {
 	//This function is dipatching events to the actual scene
@@ -165,12 +192,18 @@ void Game::HandleEvents()
 	}
 }
 
+/**
+ * @brief 更新计时器并驱动当前场景的逻辑更新。
+ */
 void Game::Update()
 {
 	timer.Update();
 	sceneManager->Update(timer.GetScaledTime());
 }
 
+/**
+ * @brief 执行当前帧的渲染流程并在窗口上呈现结果。
+ */
 void Game::Render()
 {
 	sceneManager->PrepareRender();
@@ -178,6 +211,11 @@ void Game::Render()
 	windowManager.PresentWindow();
 }
 
+/**
+ * @brief 根据目标帧率控制每帧的延迟时间，使帧率尽量稳定。
+ * @param frameStart 当前帧开始时的时间戳（毫秒）。
+ * @param targetFPS 目标帧率。
+ */
 void Game::DelayFrameTime(const unsigned frameStart, const unsigned short targetFPS)
 {
 	const unsigned targetLength = 1000 / targetFPS;
@@ -189,6 +227,9 @@ void Game::DelayFrameTime(const unsigned frameStart, const unsigned short target
 	}
 }
 
+/**
+ * @brief 销毁游戏环境并退出 SDL。
+ */
 void Game::Destroy()
 {
 	SDL_Quit();

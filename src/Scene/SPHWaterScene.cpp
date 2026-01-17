@@ -1,3 +1,8 @@
+/**
+ * @file SPHWaterScene.cpp
+ * @brief 实现 SPHWaterScene 的初始化、更新与渲染逻辑。
+ */
+
 #include "SPHWaterScene.hpp"
 
 #include "../Helper/Shader.hpp"
@@ -22,6 +27,11 @@ static constexpr const unsigned DtLocation = 0;
 namespace
 {
 
+/**
+ * @brief 将渲染模式枚举转换为可读字符串。
+ * @param mode 渲染模式枚举值。
+ * @return 对应模式名称的字符串。
+ */
 const char* RenderModeName(SPHWaterScene::RenderMode mode)
 {
 	switch(mode)
@@ -37,6 +47,11 @@ const char* RenderModeName(SPHWaterScene::RenderMode mode)
 	}
 }
 
+/**
+ * @brief 根据当前渲染模式计算下一个渲染模式，实现循环切换。
+ * @param mode 当前渲染模式。
+ * @return 下一个渲染模式。
+ */
 SPHWaterScene::RenderMode NextRenderMode(SPHWaterScene::RenderMode mode)
 {
 	switch(mode)
@@ -54,6 +69,10 @@ SPHWaterScene::RenderMode NextRenderMode(SPHWaterScene::RenderMode mode)
 
 } // namespace
 
+/**
+ * @brief 处理窗口相关事件，在窗口大小变化时更新视口。
+ * @param event SDL 窗口事件。
+ */
 void SPHWaterScene::OnWindow(SDL_WindowEvent& event)
 {
 	switch(event.event)
@@ -65,6 +84,10 @@ void SPHWaterScene::OnWindow(SDL_WindowEvent& event)
 	}
 }
 
+/**
+ * @brief 场景开始时初始化计算着色器、OpenGL 状态以及粒子状态数据。
+ * @return 初始化成功返回 true，失败时返回 false。
+ */
 bool SPHWaterScene::Begin()
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, sizeof("Scene Init") / sizeof(char), "Scene Init");
@@ -120,16 +143,26 @@ bool SPHWaterScene::Begin()
 	return true;
 }
 
+/**
+ * @brief 处理退出事件，通知 Game 主循环停止。
+ * @param event SDL 退出事件。
+ */
 void SPHWaterScene::OnQuit(SDL_QuitEvent& event)
 {
 	game->running = false;
 }
 
+/**
+ * @brief 场景结束时调用，当前未做额外资源释放。
+ */
 void SPHWaterScene::End()
 {
 
 }
 
+/**
+ * @brief 场景被暂停时调用，当前未做额外处理。
+ */
 void SPHWaterScene::Pause()
 {
 
@@ -139,6 +172,10 @@ constexpr size_t groupX = 4;
 constexpr size_t groupY = 4;
 constexpr size_t groupZ = 4;
 
+/**
+ * @brief 更新模拟状态和渲染用数据，并在时间累积到阈值时执行 SPH 模拟步。
+ * @param delta 本帧经过的时间（秒）。
+ */
 void SPHWaterScene::Update(const double delta)
 {
 	timeRemainder += delta;
@@ -170,10 +207,16 @@ void SPHWaterScene::Update(const double delta)
 	}
 }
 
+/**
+ * @brief 渲染前的准备阶段，当前由各渲染模块自行处理数据。
+ */
  void SPHWaterScene::PrepareRender()
 {
 }
 
+/**
+ * @brief 根据当前渲染模式绘制水体表面或粒子。
+ */
 void SPHWaterScene::Render()
 {
 	switch(renderMode)
@@ -221,6 +264,10 @@ void SPHWaterScene::Render()
 	}
 }
 
+/**
+ * @brief 处理键盘输入，支持切换渲染模式、暂停模拟以及控制观察视角。
+ * @param event SDL 键盘事件。
+ */
 void SPHWaterScene::OnKeyboard(SDL_KeyboardEvent& event)
 {
 	switch(event.keysym.sym)
@@ -309,6 +356,9 @@ void SPHWaterScene::OnKeyboard(SDL_KeyboardEvent& event)
 	}
 }
 
+/**
+ * @brief 析构函数，当前未做额外清理逻辑。
+ */
 SPHWaterScene::~SPHWaterScene()
 {
 

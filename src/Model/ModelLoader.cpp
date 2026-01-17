@@ -1,3 +1,8 @@
+/**
+ * @file ModelLoader.cpp
+ * @brief 实现 ModelLoader 通过 Assimp 导入模型并写入缓冲的逻辑。
+ */
+
 #include "ModelLoader.hpp"
 
 #include "../Log/Logger.h"
@@ -11,6 +16,12 @@
 
 #include <limits>
 
+/**
+ * @brief 使用 Assimp 从文件导入模型，并填充到刚体模型对象中。
+ * @param filename 模型文件路径。
+ * @param newModel 输出的刚体模型。
+ * @return 导入成功返回 true，否则返回 false。
+ */
 bool ModelLoader::ImportFile(const std::string& filename, RigidModel& newModel)
 {
 	Assimp::Importer importer;
@@ -47,6 +58,13 @@ bool ModelLoader::ImportFile(const std::string& filename, RigidModel& newModel)
 	return true;
 }
 
+/**
+ * @brief 根据索引类型处理网格索引并写入索引缓冲。
+ * @tparam T 索引类型。
+ * @param mesh Assimp 网格对象。
+ * @param model 目标刚体模型。
+ * @param vertex 顶点缓冲偏移及大小信息。
+ */
 template <typename T>
 void ModelLoader::HandleIndices(const aiMesh& mesh, RigidModel& model, const std::pair<GLuint, GLuint>& vertex)
 {
@@ -55,6 +73,13 @@ void ModelLoader::HandleIndices(const aiMesh& mesh, RigidModel& model, const std
 	model.meshes.emplace_back(vertex.first, (GLint) vertex.second, (char*)(0) + indexOffset, vec.size(), GL::TypeEnum<T>::value);
 }
 
+/**
+ * @brief 将索引数据写入索引缓冲，并返回写入的偏移。
+ * @param size 数据大小（字节）。
+ * @param data 索引数据指针。
+ * @param alignment 对齐字节数。
+ * @return 写入在缓冲中的偏移。
+ */
 GLuint ModelLoader::InsertIndices (GLuint size, const void* data, GLuint alignment)
 {
 	GLuint offset = indexBuffer.Push(size, data, alignment);
@@ -62,6 +87,11 @@ GLuint ModelLoader::InsertIndices (GLuint size, const void* data, GLuint alignme
 	return offset;
 }
 
+/**
+ * @brief 将顶点数组写入顶点缓冲，并返回偏移和占用大小。
+ * @param vertices 顶点数组。
+ * @return pair，第一个为顶点起始索引，第二个为占用字节数。
+ */
 std::pair<GLuint, GLuint> ModelLoader::InsertVertices(const std::vector<BasicVertexFormat>& vertices)
 {
 	GLuint vertexSize = static_cast<GLuint> (vertices.size() * sizeof(BasicVertexFormat));
@@ -70,6 +100,12 @@ std::pair<GLuint, GLuint> ModelLoader::InsertVertices(const std::vector<BasicVer
 	return std::make_pair(offset / sizeof(BasicVertexFormat), vertexSize);
 }
 
+/**
+ * @brief 从 Assimp 网格中提取三角形索引数据。
+ * @tparam T 索引类型。
+ * @param mesh Assimp 网格对象。
+ * @return 索引数组。
+ */
 template <typename T>
 std::vector<T> ModelLoader::GetIndices(const aiMesh& mesh)
 {
@@ -85,6 +121,11 @@ std::vector<T> ModelLoader::GetIndices(const aiMesh& mesh)
 	return indices;
 }
 
+/**
+ * @brief 从 Assimp 网格中提取顶点位置、法线和纹理坐标数据。
+ * @param mesh Assimp 网格对象。
+ * @return 顶点数组。
+ */
 std::vector<BasicVertexFormat> ModelLoader::GetVertices(const aiMesh& mesh)
 {
 	std::vector<BasicVertexFormat> vertices;

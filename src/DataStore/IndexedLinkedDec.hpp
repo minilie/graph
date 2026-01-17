@@ -1,3 +1,8 @@
+/**
+ * @file IndexedLinkedDec.hpp
+ * @brief 声明基于索引实现的链表及其迭代器。
+ */
+
 #ifndef INDEXED_LINKED_LIST_HPP
 #define INDEXED_LINKED_LIST_HPP
 
@@ -5,6 +10,10 @@
 
 #include "SlotContainer.hpp"
 
+/**
+ * @brief 使用数组存储节点，并通过索引链接形成链表的容器。
+ * @tparam T 存储的元素类型。
+ */
 template<typename T>
 class IndexedLinkedList
 {
@@ -18,6 +27,9 @@ private:
 
 	std::vector<Node> storage;
 
+	/**
+	 * @brief 可修改迭代器，实现对链表的顺序遍历。
+	 */
 	class iterator
 	{
 	private:
@@ -43,6 +55,9 @@ private:
 		bool operator!=(const iterator& other) const;
 	};
 
+	/**
+	 * @brief 只读迭代器，提供 const 版本的访问。
+	 */
 	class const_iterator
 	{
 	private:
@@ -73,6 +88,9 @@ private:
 	std::size_t front;
 	std::size_t back;
 public:
+	/**
+	 * @brief 构造函数，初始化表头与表尾索引。
+	 */
 	IndexedLinkedList() :
 		front(0),
 		back(0)

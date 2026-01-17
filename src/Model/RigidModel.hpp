@@ -1,3 +1,8 @@
+/**
+ * @file RigidModel.hpp
+ * @brief 声明由若干网格与材质组成的刚体模型结构。
+ */
+
 #ifndef RIGID_MODEL_HPP
 #define RIGID_MODEL_HPP
 
@@ -6,6 +11,9 @@
 
 using MaterialId = unsigned int;
 
+/**
+ * @brief 表示一个刚体模型，由多个 Mesh3D 与对应材质组成。
+ */
 class RigidModel
 {
 public:

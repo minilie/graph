@@ -1,3 +1,8 @@
+/**
+ * @file SceneManager.h
+ * @brief 声明场景管理器，用于管理场景栈与当前活动场景。
+ */
+
 #ifndef SCENE_MANAGER_H
 #define SCENE_MANAGER_H
 
@@ -8,6 +13,9 @@
 
 struct Scene;
 
+/**
+ * @brief 负责维护场景栈，支持切换、压栈与弹出场景的管理器。
+ */
 class SceneManager :
 	public GameComponent
 {

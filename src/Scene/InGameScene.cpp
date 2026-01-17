@@ -1,3 +1,8 @@
+/**
+ * @file InGameScene.cpp
+ * @brief 实现 InGameScene 的加载、更新与渲染逻辑。
+ */
+
 #include "InGameScene.h"
 
 #include "../Log/Logger.h"
@@ -12,6 +17,10 @@
 
 #include <cmath>
 
+/**
+ * @brief 场景开始时初始化 OpenGL 状态、加载着色器和模型数据。
+ * @return 初始化成功返回 true，失败时返回 false。
+ */
 bool InGameScene::Begin()
 {
 	glClearColor(0.3, 0., 0., 1.);
@@ -42,6 +51,10 @@ bool InGameScene::Begin()
 	return true;
 }
 
+/**
+ * @brief 加载模型数据到顶点与索引缓冲中。
+ * @return 加载成功返回 true，否则返回 false。
+ */
 bool InGameScene::LoadData()
 {
 	desc.AttachVertex(vertexBuffer.GetBuffer());
@@ -59,6 +72,10 @@ bool InGameScene::LoadData()
 	return true;
 }
 
+/**
+ * @brief 加载并初始化用于渲染的着色器程序及其统一变量。
+ * @return 初始化成功返回 true，否则返回 false。
+ */
 bool InGameScene::LoadShaders()
 {
 	Logger::Debug() << "UniformLocation(model): " << (modelID = program.Program().GetUniformLocation("model")) << '\n';
@@ -73,23 +90,39 @@ bool InGameScene::LoadShaders()
 	return true;
 }
 
+/**
+ * @brief 更新场景时间等与逻辑相关的数据。
+ * @param deltaTime 距离上一帧经过的时间。
+ */
 void InGameScene::Update(double deltaTime)
 {
 	time = SDL_GetTicks() / 300.0f;
 }
 
+/**
+ * @brief 场景结束时调用，当前未做额外清理工作。
+ */
 void InGameScene::End()
 {
 }
 
+/**
+ * @brief 场景被暂停时调用，当前未做额外处理。
+ */
 void InGameScene::Pause()
 {
 }
 
+/**
+ * @brief 渲染前的准备阶段，当前未做额外处理。
+ */
 void InGameScene::PrepareRender()
 {
 }
 
+/**
+ * @brief 执行渲染逻辑，绘制加载的模型。
+ */
 void InGameScene::Render()
 {
 	// Clear the screen and depth buffer
@@ -123,11 +156,20 @@ void InGameScene::Render()
 
 	program.Unuse();
 }
+
+/**
+ * @brief 处理退出事件，触发场景退出。
+ * @param event SDL 退出事件。
+ */
 void InGameScene::OnQuit(SDL_QuitEvent& event)
 {
 	Quit();
 }
 
+/**
+ * @brief 处理窗口事件，主要在窗口尺寸变化时更新视口和投影矩阵。
+ * @param event SDL 窗口事件。
+ */
 void InGameScene::OnWindow(SDL_WindowEvent& event)
 {
 	switch(event.event)
@@ -140,11 +182,19 @@ void InGameScene::OnWindow(SDL_WindowEvent& event)
 	}
 }
 
+/**
+ * @brief 请求退出游戏，将 Game::running 置为 false。
+ */
 void InGameScene::Quit()
 {
 	Logger::Debug() << "Exit" << '\n';
 	game->running = false;
 }
+
+/**
+ * @brief 处理键盘事件，支持退出与简单日志输出。
+ * @param event SDL 键盘事件。
+ */
 void InGameScene::OnKeyboard(SDL_KeyboardEvent& event)
 {
 	switch(event.keysym.sym)

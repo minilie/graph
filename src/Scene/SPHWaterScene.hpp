@@ -1,3 +1,8 @@
+/**
+ * @file SPHWaterScene.hpp
+ * @brief 声明基于 SPH 的水体模拟场景。
+ */
+
 #ifndef SPH_WATER_SCENE_HPP
 #define SPH_WATER_SCENE_HPP
 
@@ -17,9 +22,15 @@
 
 #include <GL/glew.h>
 
+/**
+ * @brief 负责驱动基于 SPH 的水模拟，并进行不同模式的渲染展示的场景。
+ */
 class SPHWaterScene : public Scene
 {
 public:
+	/**
+	 * @brief 渲染模式，控制是渲染表面还是粒子。
+	 */
 	enum class RenderMode
 	{
 		Surface,
@@ -50,6 +61,9 @@ private:
 
 	static constexpr float stepTime = 0.016666666666;
 public:
+	/**
+	 * @brief 构造函数，初始化模拟状态和各种渲染、计算模块。
+	 */
 	SPHWaterScene() :
 		state(32, 64, 64, 20),
 		grid(state),

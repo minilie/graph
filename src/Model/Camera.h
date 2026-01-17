@@ -1,8 +1,16 @@
+/**
+ * @file Camera.h
+ * @brief 声明简单的三维摄像机类，用于计算视图矩阵。
+ */
+
 #ifndef CAMERA_H
 #define CAMERA_H
 
 #include <glm/glm.hpp>
 
+/**
+ * @brief 表示观察者位置与方向的摄像机，提供视图矩阵及相关方向向量。
+ */
 class Camera
 {
 public:

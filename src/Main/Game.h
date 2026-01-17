@@ -1,3 +1,8 @@
+/**
+ * @file Game.h
+ * @brief 声明 Game 类，用于管理游戏主循环、场景和窗口。
+ */
+
 #include "ScaledDeltaTimer.h"
 #include "../Manager/SceneManager.h"
 #include "../Manager/WindowManager.h"

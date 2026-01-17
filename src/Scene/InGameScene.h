@@ -1,3 +1,8 @@
+/**
+ * @file InGameScene.h
+ * @brief 声明测试场景 InGameScene，用于渲染简单 3D 模型。
+ */
+
 #ifndef IN_GAME_SCENE_H
 #define IN_GAME_SCENE_H
 
@@ -11,6 +16,9 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+/**
+ * @brief 演示用场景，实现基础的 3D 模型加载与渲染。
+ */
 class InGameScene :
 	public Scene
 {
