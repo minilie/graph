@@ -199,6 +199,10 @@ void SPHWaterScene::Update(const double delta)
 		glm::vec3 grav = renderSurface.GetGravity();
 		glUniform3fv(1, 1, reinterpret_cast<const GLfloat*>(&grav[0]));
 
+		// Provide rigid obstacle toggle and radius to integrator
+		glUniform1i(2, rigidEnabled ? 1 : 0);
+		glUniform1f(3, rigidRadius);
+
 		glDispatchCompute(state.ResX() / groupX, state.ResY() / groupY, state.ResZ() / groupZ);
 
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -228,6 +232,7 @@ void SPHWaterScene::Render()
 				distanceFieldDirty = false;
 			}
 			renderSurface.Render();
+			// Rigid surface rendering removed per request
 			break;
 		case RenderMode::Points:
 		{
@@ -245,6 +250,7 @@ void SPHWaterScene::Render()
 			int bType = renderSurface.IsSphere() ? 1 : 0;
 			float bRadius = renderSurface.GetBoundaryRadius();
 			renderPoints.Render(eye, planeOrigin, planeAxisX, planeAxisY, bType, bRadius);
+			// Rigid surface rendering removed per request
 			break;
 		}
 		case RenderMode::EdgePoints:
@@ -263,6 +269,7 @@ void SPHWaterScene::Render()
 			int bType = renderSurface.IsSphere() ? 1 : 0;
 			float bRadius = renderSurface.GetBoundaryRadius();
 			renderEdgePoints.Render(eye, planeOrigin, planeAxisX, planeAxisY, bType, bRadius);
+			// Rigid surface rendering removed per request
 			break;
 		}
 	}
@@ -308,6 +315,13 @@ void SPHWaterScene::OnKeyboard(SDL_KeyboardEvent& event)
 			{
 				renderMode = RenderMode::EdgePoints;
 				Logger::Info() << "Render mode: " << RenderModeName(renderMode) << '\n';
+			}
+			break;
+		case '4':
+			if(event.state == SDL_RELEASED)
+			{
+				rigidEnabled = !rigidEnabled;
+				Logger::Info() << "Rigid obstacle: " << (rigidEnabled ? "ON" : "OFF") << '\n';
 			}
 			break;
 		case 'f':

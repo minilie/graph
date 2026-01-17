@@ -59,6 +59,10 @@ private:
 
 	bool paused;
 
+	// Rigid body obstacle control
+	bool rigidEnabled;
+	float rigidRadius;
+
 	static constexpr float stepTime = 0.016666666666;
 public:
 	/**
@@ -75,7 +79,9 @@ public:
 		distanceFieldDirty(true),
 		time(0),
 		timeRemainder(0),
-		paused(false)
+		paused(false),
+		rigidEnabled(false),
+		rigidRadius(0.3f)
 	{
 	}
 

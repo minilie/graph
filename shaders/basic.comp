@@ -26,6 +26,9 @@ const float Damping = 0.7;
 
 layout(location = 0) uniform float dt;
 layout(location = 1) uniform vec3 gravityDir;
+// Rigid obstacle toggle and radius (center at origin)
+layout(location = 2) uniform int obstacleEnabled;
+layout(location = 3) uniform float obstacleRadius;
 
 uvec3 resolution = gl_NumWorkGroups * gl_WorkGroupSize;
 
@@ -39,6 +42,25 @@ void main()
     vec3 acceleration = force[id] / density[id] + gravityDir * 9.8;
     vec3 vel = velocity[id] + acceleration * dt;
     vec3 pos = position[id] + vel * dt;
+
+    // Rigid sphere obstacle at the simulation center
+    if(obstacleEnabled != 0)
+    {
+        float r = obstacleRadius;
+        vec3 center = vec3(0.0);
+        vec3 toCenter = pos - center;
+        float dist = length(toCenter);
+        if(dist < r)
+        {
+            vec3 n = dist > 0.0 ? toCenter / dist : vec3(0.0, 1.0, 0.0);
+            // Project position to surface and reflect velocity
+            pos = center + n * r;
+            float vn = dot(vel, n);
+            vel = vel - (1.0 + Damping) * vn * n;
+            // Simple tangential damping
+            vel *= 0.95;
+        }
+    }
 
     if(pos[0] < -1.0)
     {

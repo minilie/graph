@@ -1,34 +1,48 @@
 #version 450
 
-layout(local_size_x = 64) in; // workgroup size
+/*
+ * 距离场生成（计算着色器）
+ * 输入：`edgeBuffer`、`BoundaryType`、`BoundaryRadius`
+ * 输出：`distanceField`（r32f）
+ */
 
+layout(local_size_x = 64) in; // 工作组大小
+
+// 边界粒子缓冲（std430）
 layout(std430) restrict buffer edgeBuffer
 {
     uint count;
     vec3 position[];
 } edgeParticles;
 
+// 距离场 3D 纹理（r32f）
 layout(r32f, binding = 0) uniform restrict image3D distanceField;
 
+// 半径阈值
 const float MaxRadius = 0.08;
-const float MinRadius = 0.00;//0.05 * distFieldSize;
+const float MinRadius = 0.00;
 
-const int boxSize = 6;//int(ceil(distFieldSize * MaxRadius / 2.0));
+// 邻域半尺寸
+const int boxSize = 6;
 
-layout(location = 3) uniform int BoundaryType; // 0: Cube, 1: Sphere
-layout(location = 4) uniform float BoundaryRadius; // normalized [0,1], sphere radius
+// 边界参数（位置与 CPU 侧一致）
+layout(location = 3) uniform int BoundaryType;   // 0: 立方体；1: 球体
+layout(location = 4) uniform float BoundaryRadius; // 半径 [0,1]
 
+// 立方体判定
 bool inCube(vec3 p)
 {
 	return all(lessThan(p, vec3(1.0))) && all(greaterThanEqual(p, vec3(0.0)));
 }
 
+// 球体判定（中心 0.5）
 bool inSphere(vec3 p)
 {
 	vec3 c = vec3(0.5, 0.5, 0.5);
 	return distance(p, c) <= BoundaryRadius;
 }
 
+// 统一判定
 bool inBoundary(vec3 p)
 {
 	return (BoundaryType == 0) ? inCube(p) : inSphere(p);
@@ -36,14 +50,18 @@ bool inBoundary(vec3 p)
 
 void main()
 {
+	// 展开 ID
 	uint id =
 		gl_GlobalInvocationID.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z +
 		gl_GlobalInvocationID.y * gl_WorkGroupSize.z +
 		gl_GlobalInvocationID.z;
 
+	// 范围检查
 	if(id < edgeParticles.count)
 	{
+		// 体素尺寸
 		const ivec3 distFieldSize = imageSize(distanceField);
+		// 坐标映射到体素空间
 		vec3 pos = ((edgeParticles.position[id] + 1.0) / 2.2 + vec3(0.05, 0.05, 0.05)) * distFieldSize;
 		vec3 center = pos;
 		for(int x = -1 * boxSize; x < boxSize; ++x)
@@ -61,15 +79,19 @@ void main()
 					if(center.z + z < 0 || center.z + z >= distFieldSize.z)
 						continue;
 
+					// 边界判定
 					ivec3 sampleCoord = ivec3(center) + ivec3(x, y, z);
 					vec3 sampleNorm = vec3(sampleCoord) / vec3(distFieldSize);
+					// 体素必须位于所选边界内才考虑写入距离
 					if(!inBoundary(sampleNorm))
 						continue;
 
+					// 距离归一化
 					float dist = distance(pos, vec3(sampleCoord)) / distFieldSize.x;
+					// 半径范围过滤
 					if(dist >= MinRadius && dist <= MaxRadius)
 					{
-						//imageAtomicMin(distanceField, ivec3(center + ivec3(x, y, z)), int(dist * 10000));
+						// 写入更小值
 						float prev = imageLoad(distanceField, sampleCoord).r;
 						if(dist < prev)
 							imageStore(distanceField, sampleCoord, vec4(dist));
